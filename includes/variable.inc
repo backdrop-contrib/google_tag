@@ -362,13 +362,13 @@ function _google_tag_variable_states($variable) {
  */
 function _google_tag_validate_container_id($variable, $options, $element, $form, &$form_state) {
   // Use this routine as the variable realm form has nested values.
-  $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
   // Trim the text value.
   $value = trim($value);
   // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
   $value = str_replace(array('–', '—', '−'), '-', $value);
   // Replace the text value.
-  drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
 
   if (!preg_match('/^GTM-\w{4,}$/', $value)) {
     // @todo Is there a more specific regular expression that applies?
@@ -387,12 +387,12 @@ function _google_tag_validate_environment_id($variable, $options, $element, $for
   $parents = $element['#parents'];
   array_pop($parents);
   $parents[] = 'google_tag_include_environment';
-  $include_environment = drupal_array_get_nested_value($form_state['values'], $parents);
+  $include_environment = backdrop_array_get_nested_value($form_state['values'], $parents);
 
-  $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
   $value = trim($value);
   $value = str_replace(array('–', '—', '−'), '-', $value);
-  drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
 
   if ($include_environment && !preg_match('/^env-\d{1,}$/', $value)) {
     return t('A valid environment ID is case sensitive and formatted like env-x.');
@@ -403,9 +403,9 @@ function _google_tag_validate_environment_id($variable, $options, $element, $for
  * Element validation handler for google_tag_data_layer.
  */
 function _google_tag_validate_data_layer($variable, $options, $element, $form, &$form_state) {
-  $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
   $value = trim($value);
-  drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
   return _google_tag_data_layer_verify($value);
 }
 
@@ -413,7 +413,7 @@ function _google_tag_validate_data_layer($variable, $options, $element, $form, &
  * Element validation handler for google_tag_listed_classes.
  */
 function _google_tag_validate_listed_classes($variable, $options, $element, $form, &$form_state) {
-  if (!drupal_array_get_nested_value($form_state['values'], $element['#parents'])) {
+  if (!backdrop_array_get_nested_value($form_state['values'], $element['#parents'])) {
     return;
   }
 
@@ -430,7 +430,7 @@ function _google_tag_validate_listed_classes($variable, $options, $element, $for
   foreach ($keys as $key) {
     array_pop($element['#parents']);
     $element['#parents'][] = $key;
-    $classes = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+    $classes = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
     google_tag_text_clean($classes);
     $empty &= empty($classes);
   }
@@ -445,7 +445,7 @@ function _google_tag_validate_listed_classes($variable, $options, $element, $for
  * Element validation handler for text values.
  */
 function _google_tag_validate_text($variable, $options, $element, $form, &$form_state) {
-  $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
   google_tag_text_clean($value);
-  drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
 }

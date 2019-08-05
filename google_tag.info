@@ -1,6 +1,7 @@
+type = module
 name = Google Tag Manager
 description = Allows your website analytics to be managed using Google Tag Manager.
 package = Statistics
-core = 7.x
+backdrop = 1.x
 
 configure = admin/config/system/google_tag

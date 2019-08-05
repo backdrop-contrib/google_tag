@@ -21,7 +21,7 @@ function google_tag_snippets() {
     'data_layer' => _google_tag_data_layer_snippet(),
   );
   // Allow other modules to alter the snippets.
-  drupal_alter('google_tag_snippets', $snippets);
+  backdrop_alter('google_tag_snippets', $snippets);
   return $snippets;
 }
 
@@ -36,7 +36,7 @@ function _google_tag_script_snippet() {
   $container_id = _google_tag_variable_clean('google_tag_container_id');
   $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
   $query = _google_tag_environment_query();
-  $compact = variable_get('google_tag_compact_snippet', 1);
+  $compact = config_get('google_tag.settings','google_tag_compact_snippet', 1);
 
   // Build script snippet.
   $script = <<<EOS
@@ -77,7 +77,7 @@ function _google_tag_noscript_snippet() {
   // Gather data.
   $container_id = _google_tag_variable_clean('google_tag_container_id');
   $query = _google_tag_environment_query();
-  $compact = variable_get('google_tag_compact_snippet', 1);
+  $compact = config_get('google_tag.settings','google_tag_compact_snippet', 1);
 
   // Build noscript snippet.
   $noscript = <<<EOS
@@ -106,8 +106,8 @@ EOS;
 function _google_tag_data_layer_snippet(&$classes = array()) {
   // Gather data.
   $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
-  $whitelist = variable_get('google_tag_whitelist_classes', GOOGLE_TAG_WHITELIST_CLASSES);
-  $blacklist = variable_get('google_tag_blacklist_classes', GOOGLE_TAG_BLACKLIST_CLASSES);
+  $whitelist = config_get('google_tag.settings','google_tag_whitelist_classes', GOOGLE_TAG_WHITELIST_CLASSES);
+  $blacklist = config_get('google_tag.settings','google_tag_blacklist_classes', GOOGLE_TAG_BLACKLIST_CLASSES);
 
   $classes = array();
   $names = array('whitelist', 'blacklist');
@@ -120,7 +120,7 @@ function _google_tag_data_layer_snippet(&$classes = array()) {
   }
 
   // Build data layer snippet.
-  $script = $classes ? "var $data_layer = [" . drupal_json_encode($classes) . '];' : '';
+  $script = $classes ? "var $data_layer = [" . backdrop_json_encode($classes) . '];' : '';
   return $script;
 }
 
@@ -131,7 +131,7 @@ function _google_tag_data_layer_snippet(&$classes = array()) {
  *   The query string.
  */
 function _google_tag_environment_query() {
-  if (!variable_get('google_tag_include_environment', 0)) {
+  if (!config_get('google_tag.settings','google_tag_include_environment', 0)) {
     return '';
   }
 
@@ -155,5 +155,5 @@ function _google_tag_environment_query() {
  *   The cleansed variable.
  */
 function _google_tag_variable_clean($variable, $default = '') {
-  return trim(drupal_json_encode(variable_get($variable, $default)), '"');
+  return trim(backdrop_json_encode(config_get('google_tag.settings',$variable, $default)), '"');
 }

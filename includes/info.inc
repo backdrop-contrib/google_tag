@@ -26,7 +26,7 @@ function _google_tag_menu() {
   $items['admin/config/system/google_tag'] = array(
     'title' => 'Google Tag Manager',
     'description' => 'Configure the website integration with GTM and the resultant capturing of website analytics.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('google_tag_settings_form'),
     'access arguments' => array('administer google tag manager'),
     'type' => MENU_NORMAL_ITEM,

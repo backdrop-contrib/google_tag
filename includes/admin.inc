@@ -16,6 +16,7 @@
  * @ingroup forms
  */
 function google_tag_settings_form($form, &$form_state) {
+  $form['#config'] = 'google_tag.settings';
   module_load_include('inc', 'google_tag', 'includes/variable');
 
   // Gather data.
@@ -40,8 +41,8 @@ function google_tag_settings_form($form, &$form_state) {
     '#default_tab' => $default_tab ? $default_tab : 'edit-general',
     '#attributes' => array('class' => array('google-tag')),
     '#attached' => array(
-      'css' => array(drupal_get_path('module', 'google_tag') . '/css/google_tag.admin.css'),
-      'js' => array(drupal_get_path('module', 'google_tag') . '/js/google_tag.admin.js'),
+      'css' => array(backdrop_get_path('module', 'google_tag') . '/css/google_tag.admin.css'),
+      'js' => array(backdrop_get_path('module', 'google_tag') . '/js/google_tag.admin.js'),
     ),
   );
   foreach ($groups as $group => $items) {
@@ -101,7 +102,7 @@ function google_tag_form_elements($variables) {
       }
     }
     $element['#type'] = google_tag_form_element_type($element['#type']);
-    $element['#default_value'] = variable_get($name, $variable['default']);
+    $element['#default_value'] = config_get('google_tag.settings',$name, $variable['default']);
     $element += isset($variable['element']) ? $variable['element'] : array();
     $elements[$name] = $element;
   }
@@ -251,7 +252,7 @@ function _google_tag_assets_create() {
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
       foreach ($keys as $key_name => $key_title) {
-        drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
+        backdrop_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
         variable_realm_switch($realm_name, $key_name);
         if (_google_tag_directory_prepare($realm_name)) {
           _google_tag_snippets_save($realm_name, $key_name);
@@ -267,8 +268,8 @@ function _google_tag_assets_create() {
     }
   }
 
-  _drupal_flush_css_js();
-  drupal_clear_js_cache();
+  _backdrop_flush_css_js();
+  backdrop_clear_js_cache();
 }
 
 /**
@@ -350,7 +351,7 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
  * Stores data layer classes based on current settings.
  */
 function _google_tag_classes_save($realm_name = '', $realm_key = '') {
-  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
+  $data_layer = config_get('google_tag.settings','google_tag_data_layer', 'dataLayer');
   if (module_exists('datalayer') && $data_layer == 'dataLayer') {
     // Save classes for data layer.
     // @todo How to or can we set the name of the data layer?
@@ -361,7 +362,7 @@ function _google_tag_classes_save($realm_name = '', $realm_key = '') {
       variable_realm_set($realm_name, $realm_key, 'google_tag_data_layer_classes', $classes);
     }
     else {
-      variable_set('google_tag_data_layer_classes', $classes);
+      config_set('google_tag.settings','google_tag_data_layer_classes', $classes);
     }
   }
 }
@@ -414,15 +415,15 @@ function __file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSION
   if (!is_dir($directory)) {
     // Let mkdir() recursively create directories and use the default directory
     // permissions.
-    if (($options & FILE_CREATE_DIRECTORY) && @drupal_mkdir($directory, NULL, TRUE)) {
-      return drupal_chmod($directory);
+    if (($options & FILE_CREATE_DIRECTORY) && @backdrop_mkdir($directory, NULL, TRUE)) {
+      return backdrop_chmod($directory);
     }
     return FALSE;
   }
   // The directory exists, so check to see if it is writable.
   $writable = _google_tag_is_writable($directory) && _google_tag_is_executable($directory);
   if (!$writable && ($options & FILE_MODIFY_PERMISSIONS)) {
-    return drupal_chmod($directory);
+    return backdrop_chmod($directory);
   }
 
   return $writable;
@@ -518,11 +519,11 @@ function _google_tag_is_windows() {
 /**
  * Displays a message to admin users.
  *
- * @see arguments to t() and drupal_set_message()
+ * @see arguments to t() and backdrop_set_message()
  */
 function _google_tag_message_display($message, $args = array(), $type = 'status') {
   global $google_tag_display_message;
   if ($google_tag_display_message) {
-    drupal_set_message(t($message, $args), $type);
+    backdrop_set_message(t($message, $args), $type);
   }
 }
