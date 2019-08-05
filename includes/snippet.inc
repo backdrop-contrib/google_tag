@@ -36,7 +36,7 @@ function _google_tag_script_snippet() {
   $container_id = _google_tag_variable_clean('google_tag_container_id');
   $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
   $query = _google_tag_environment_query();
-  $compact = config_get('google_tag.settings','google_tag_compact_snippet', 1);
+  $compact = config_get('google_tag.settings','google_tag_compact_snippet');
 
   // Build script snippet.
   $script = <<<EOS
@@ -77,7 +77,7 @@ function _google_tag_noscript_snippet() {
   // Gather data.
   $container_id = _google_tag_variable_clean('google_tag_container_id');
   $query = _google_tag_environment_query();
-  $compact = config_get('google_tag.settings','google_tag_compact_snippet', 1);
+  $compact = config_get('google_tag.settings','google_tag_compact_snippet');
 
   // Build noscript snippet.
   $noscript = <<<EOS
@@ -106,8 +106,8 @@ EOS;
 function _google_tag_data_layer_snippet(&$classes = array()) {
   // Gather data.
   $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
-  $whitelist = config_get('google_tag.settings','google_tag_whitelist_classes', GOOGLE_TAG_WHITELIST_CLASSES);
-  $blacklist = config_get('google_tag.settings','google_tag_blacklist_classes', GOOGLE_TAG_BLACKLIST_CLASSES);
+  $whitelist = config_get('google_tag.settings','google_tag_whitelist_classes');
+  $blacklist = config_get('google_tag.settings','google_tag_blacklist_classes');
 
   $classes = array();
   $names = array('whitelist', 'blacklist');
@@ -131,7 +131,7 @@ function _google_tag_data_layer_snippet(&$classes = array()) {
  *   The query string.
  */
 function _google_tag_environment_query() {
-  if (!config_get('google_tag.settings','google_tag_include_environment', 0)) {
+  if (config_get('google_tag.settings','google_tag_include_environment') == 0) {
     return '';
   }
 
@@ -148,12 +148,10 @@ function _google_tag_environment_query() {
  *
  * @param string $variable
  *   The variable name.
- * @param string $variable
- *   The default value for the variable.
  *
  * @return string
  *   The cleansed variable.
  */
-function _google_tag_variable_clean($variable, $default = '') {
-  return trim(backdrop_json_encode(config_get('google_tag.settings',$variable, $default)), '"');
+function _google_tag_variable_clean($variable) {
+  return trim(backdrop_json_encode(config_get('google_tag.settings',$variable)), '"');
 }

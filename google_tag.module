@@ -41,6 +41,17 @@ define('GOOGLE_TAG_WHITELIST_CLASSES', "google\nnonGooglePixels\nnonGoogleScript
 define('GOOGLE_TAG_BLACKLIST_CLASSES', "customScripts\ncustomPixels");
 
 /**
+ * Implements hook_config_info().
+ */
+function google_tag_config_info() {
+  $prefixes['google_tag.settings'] = array(
+    'label' => t('Google Tag Manager settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_help().
  */
 function google_tag_help($path, $arg) {
@@ -174,16 +185,16 @@ function google_tag_page_build(&$page) {
   //     - google_tag_page_process(): callback set here
 
   $base_path = 'public:/';
-  $include_classes = config_get('google_tag.settings','google_tag_include_classes', 0);
+  $include_classes = config_get('google_tag.settings','google_tag_include_classes');
 
   list($realm_name, $realm_key) = google_tag_realm_values();
   $realm_name .= $realm_name ? '/' : '';
   $realm_key .= $realm_key ? '.' : '';
   $types = $include_classes ? array('data_layer', 'script') : array('script');
 
-  $data_layer = config_get('google_tag.settings','google_tag_data_layer', 'dataLayer');
+  $data_layer = config_get('google_tag.settings','google_tag_data_layer');
   if ($include_classes && module_exists('datalayer') && $data_layer == 'dataLayer') {
-    $classes = config_get('google_tag.settings','google_tag_data_layer_classes', array());
+    $classes = config_get('google_tag.settings','google_tag_data_layer_classes');
     if ($classes) {
       // Add data_layer using dataLayer module.
       datalayer_add($classes);
@@ -192,8 +203,8 @@ function google_tag_page_build(&$page) {
   }
 
   // Add data_layer and script snippets to head (by default).
-  $include_script_as_file = config_get('google_tag.settings','google_tag_include_file', 1);
-  if ($include_script_as_file) {
+  $include_script_as_file = config_get('google_tag.settings','google_tag_include_file');
+  if ($include_script_as_file == 1) {
     foreach ($types as $type) {
       // A stream wrapper may be passed as $data to backdrop_add_js($data) because
       // backdrop_get_js() calls file_create_url($data). The latter will work with
@@ -267,7 +278,7 @@ function google_tag_realm_values() {
     $realm_name = $realm_values['name'];
     $realm_key = $realm_values['key'];
 
-    $debug = config_get('google_tag.settings','google_tag_debug_output', 0);
+    $debug = config_get('google_tag.settings','google_tag_debug_output');
     $debug ? backdrop_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $realm_key))) : '';
   }
   return array($realm_name, $realm_key);
@@ -280,7 +291,7 @@ function google_tag_realm_values() {
  *   TRUE if the conditions are met; FALSE otherwise.
  */
 function google_tag_insert_snippet() {
-  $id = config_get('google_tag.settings','google_tag_container_id', '');
+  $id = config_get('google_tag.settings','google_tag_container_id');
 
   if (empty($id)) {
     // No container ID.
@@ -293,7 +304,7 @@ function google_tag_insert_snippet() {
   }
   // Allow other modules to alter the insertion criteria.
   backdrop_alter('google_tag_insert', $satisfied);
-  $debug = config_get('google_tag.settings','google_tag_debug_output', 0);
+  $debug = config_get('google_tag.settings','google_tag_debug_output');
   $debug ? backdrop_set_message(t('after alter @satisfied', array('@satisfied' => $satisfied))) : '';
   return $satisfied;
 }
@@ -308,9 +319,9 @@ function _google_tag_status_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $debug = config_get('google_tag.settings','google_tag_debug_output', 0);
-    $toggle = config_get('google_tag.settings','google_tag_status_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
-    $statuses = config_get('google_tag.settings','google_tag_status_list', GOOGLE_TAG_STATUSES);
+    $debug = config_get('google_tag.settings','google_tag_debug_output');
+    $toggle = config_get('google_tag.settings','google_tag_status_toggle');
+    $statuses = config_get('google_tag.settings','google_tag_status_list');
 
     if (empty($statuses)) {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
@@ -337,9 +348,9 @@ function _google_tag_path_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $debug = config_get('google_tag.settings','google_tag_debug_output', 0);
-    $toggle = config_get('google_tag.settings','google_tag_path_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
-    $paths = config_get('google_tag.settings','google_tag_path_list', GOOGLE_TAG_PATHS);
+    $debug = config_get('google_tag.settings','google_tag_debug_output');
+    $toggle = config_get('google_tag.settings','google_tag_path_toggle');
+    $paths = config_get('google_tag.settings','google_tag_path_list');
 
     if (empty($paths)) {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
@@ -372,9 +383,9 @@ function _google_tag_role_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $debug = config_get('google_tag.settings','google_tag_debug_output', 0);
-    $toggle = config_get('google_tag.settings','google_tag_role_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
-    $roles = config_get('google_tag.settings','google_tag_role_list', array());
+    $debug = config_get('google_tag.settings','google_tag_debug_output');
+    $toggle = config_get('google_tag.settings','google_tag_role_toggle');
+    $roles = config_get('google_tag.settings','google_tag_role_list');
     $roles = array_filter($roles);
 
     if (empty($roles)) {
