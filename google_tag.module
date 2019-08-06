@@ -62,7 +62,7 @@ function google_tag_menu() {
     'page arguments' => array('google_tag_settings_form'),
     'access arguments' => array('administer google tag manager'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'includes/admin.inc',
+    'file' => 'google_tag.admin.inc',
   );
 
   return $items;
@@ -135,7 +135,7 @@ function google_tag_variable_info($options) {
  */
 function google_tag_form_variable_edit_form_alter(&$form, &$form_state, $form_id) {
   // Also include these on group and module pages for element validation.
-  form_load_include($form_state, 'inc', 'google_tag', 'includes/admin');
+  form_load_include($form_state, 'inc', 'google_tag', 'google_tag.admin');
   form_load_include($form_state, 'inc', 'google_tag', 'includes/variable');
   if (strpos($_GET['q'], 'admin/config/system/variable/edit/') === 0) {
     if (strpos($form['#variable_edit_form'][0], 'google_tag_') === 0) {
@@ -161,7 +161,7 @@ function google_tag_form_variable_realm_edit_variables_form_alter(&$form, &$form
   // @todo Why does variable_realm not set this item on this particular form?
   $form['#realm_keys'][$form['#variable_options']['realm']->realm] = $form['#variable_options']['realm']->key;
   $form['#submit'][] = 'google_tag_settings_form_submit';
-  form_load_include($form_state, 'inc', 'google_tag', 'includes/admin');
+  form_load_include($form_state, 'inc', 'google_tag', 'google_tag.admin');
   form_load_include($form_state, 'inc', 'google_tag', 'includes/variable');
 }
 
@@ -409,6 +409,6 @@ function _google_tag_role_check() {
  * Saves snippet files and data layer classes based on current settings.
  */
 function google_tag_assets_create() {
-  module_load_include('inc', 'google_tag', 'includes/admin');
+  module_load_include('inc', 'google_tag', 'google_tag.admin');
   _google_tag_assets_create();
 }
