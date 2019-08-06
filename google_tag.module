@@ -161,20 +161,18 @@ function google_tag_form_variable_realm_edit_variables_form_alter(&$form, &$form
 }
 
 /**
- * Implements hook_page_build().
+ * Implements hook_preprocess_page().
  *
  * Adds the snippet to the page array if the insertion conditions are met.
- *
- * @see backdrop_render_page()
  */
-function google_tag_page_build(&$page) {
+function google_tag_preprocess_page(&$variables) {
   if (!google_tag_insert_snippet()) {
     return;
   }
 
   // Call sequence:
   // - backdrop_render_page()
-  //   - hook_page_build()
+  //   - hook_preprocess_page()
   //   - hook_page_alter()
   //   - backdrop_render()
   // - backdrop_render()
@@ -236,7 +234,7 @@ function google_tag_page_build(&$page) {
     // Note: for any theme that follows the pattern of core html.tpl.php in the
     // system module (e.g. bootstrap theme), this does not place the snippet
     // immediately after the body tag but rather after the 'skip-link' div.
-    $page['page_top']['google_tag'] = array(
+    $variables['page_bottom']['google_tag'] = array(
       '#markup' => $noscript,
       '#weight' => -10,
     );
