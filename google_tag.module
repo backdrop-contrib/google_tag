@@ -52,27 +52,32 @@ function google_tag_config_info() {
 }
 
 /**
- * Implements hook_help().
- */
-function google_tag_help($path, $arg) {
-  module_load_include('inc', 'google_tag', 'includes/info');
-  return _google_tag_help($path, $arg);
-}
-
-/**
  * Implements hook_menu().
  */
 function google_tag_menu() {
-  module_load_include('inc', 'google_tag', 'includes/info');
-  return _google_tag_menu();
+  $items['admin/config/system/google_tag'] = array(
+    'title' => 'Google Tag Manager',
+    'description' => 'Configure the website integration with GTM and the resultant capturing of website analytics.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('google_tag_settings_form'),
+    'access arguments' => array('administer google tag manager'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/admin.inc',
+  );
+
+  return $items;
 }
 
 /**
  * Implements hook_permission().
  */
 function google_tag_permission() {
-  module_load_include('inc', 'google_tag', 'includes/info');
-  return _google_tag_permission();
+  return array(
+    'administer google tag manager' => array(
+      'title' => t('Administer Google Tag Manager'),
+      'description' => t('Configure the website integration with Google Tag Manager.'),
+    ),
+  );
 }
 
 /**
