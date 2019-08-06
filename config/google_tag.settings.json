@@ -10,7 +10,7 @@
   "google_tag_compact_snippet": 0,
   "google_tag_include_file": 1,
   "google_tag_debug_output": 0,
-  "google_tag_data_layer": "",
+  "google_tag_data_layer": "dataLayer",
   "google_tag_data_layer_classes": [],
   "google_tag_whitelist_classes": "google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes",
   "google_tag_blacklist_classes": "customScripts\ncustomPixels",

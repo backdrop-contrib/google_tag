@@ -141,21 +141,50 @@ function _google_tag_snippet_directory_prepare() {
 }
 
 /**
- * Move google_Tag settings from variables to config.
+ * Move google_tag settings from variables to config.
  */
 function google_tag_update_1000() {
   // Migrate variables to config.
   $config = config('google_tag.settings');
-  // @todo get all variables
-//  $config->set('book_allowed_types', update_variable_get('book_allowed_types', array('book')));
-//  $config->set('book_child_type', update_variable_get('book_child_type', 'book'));
-//  $config->set('book_block_mode', update_variable_get('book_block_mode', 'all pages'));
+  $config->set('google_tag_container_id', update_variable_get('google_tag_container_id',''));
+  $config->set('google_tag_path_toggle', update_variable_get('google_tag_path_toggle',''));
+  $config->set('google_tag_path_list', update_variable_get('google_tag_path_list','admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*'));
+  $config->set('google_tag_role_toggle', update_variable_get('google_tag_role_toggle',''));
+  $config->set('google_tag_role_list', update_variable_get('google_tag_role_list',array()));
+  $config->set('google_tag_status_toggle', update_variable_get('google_tag_status_toggle',''));
+  $config->set('google_tag_status_list', update_variable_get('google_tag_status_list','403 Forbidden\n404 Not Found'));
+  $config->set('google_tag_compact_snippet', update_variable_get('google_tag_compact_snippet',0));
+  $config->set('google_tag_include_file', update_variable_get('google_tag_include_file',1));
+  $config->set('google_tag_debug_output', update_variable_get('google_tag_debug_output',0));
+  $config->set('google_tag_data_layer', update_variable_get('google_tag_data_layer','dataLayer'));
+  $config->set('google_tag_data_layer_classes', update_variable_get('google_tag_data_layer_classes',array()));
+  $config->set('google_tag_whitelist_classes', update_variable_get('google_tag_whitelist_classes','google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes'));
+  $config->set('google_tag_blacklist_classes', update_variable_get('google_tag_blacklist_classes','customScripts\ncustomPixels'));
+  $config->set('google_tag_include_environment', update_variable_get('google_tag_include_environment',0));
+  $config->set('google_tag_environment_id', update_variable_get('google_tag_environment_id',''));
+  $config->set('google_tag_environment_token', update_variable_get('google_tag_environment_token',''));
+  $config->set('google_tag_include_classes', update_variable_get('google_tag_include_classes',0));
   $config->save();
 
   // Delete variables.
-//  update_variable_del('book_allowed_types');
-//  update_variable_del('book_child_type');
-//  update_variable_del('book_block_mode');
+  update_variable_del('google_tag_container_id');
+  update_variable_del('google_tag_path_toggle');
+  update_variable_del('google_tag_path_list');
+  update_variable_del('google_tag_role_toggle');
+  update_variable_del('google_tag_role_list');
+  update_variable_del('google_tag_status_toggle');
+  update_variable_del('google_tag_status_list');
+  update_variable_del('google_tag_compact_snippet');
+  update_variable_del('google_tag_include_file');
+  update_variable_del('google_tag_debug_output');
+  update_variable_del('google_tag_data_layer');
+  update_variable_del('google_tag_data_layer_classes');
+  update_variable_del('google_tag_whitelist_classes');
+  update_variable_del('google_tag_blacklist_classes');
+  update_variable_del('google_tag_include_environment');
+  update_variable_del('google_tag_environment_id');
+  update_variable_del('google_tag_environment_token');
+  update_variable_del('google_tag_include_classes');
 }
 
 /**
