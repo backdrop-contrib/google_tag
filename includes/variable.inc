@@ -8,105 +8,17 @@
  */
 
 /**
- * Implements hook_variable_group_info().
- */
-function _google_tag_variable_group_info() {
-  $groups['google_tag'] = array(
-    'title' => t('Google Tag Manager'),
-    'description' => t('Allows your website analytics to be managed using Google Tag Manager.'),
-    'access' => 'administer google tag manager',
-    'path' => array('admin/config/system/google_tag'),
-  );
-
-  return $groups;
-}
-
-/**
- * Implements hook_variable_info().
- */
-function _google_tag_variable_info($options) {
-  // Gather data.
-  $groups = array('general', 'path', 'role', 'status', 'advanced', 'internal');
-  $common = array(
-    'group' => 'google_tag',
-    'localize' => TRUE,
-    'multidomain' => TRUE,
-  );
-
-  // Build variables.
-  $variables = array();
-  foreach ($groups as $group) {
-    $function = "_google_tag_variable_info_$group";
-    $variables += $function($options);
-  }
-  foreach ($variables as $key => $variable) {
-    $variables[$key] += $common;
-  }
-
-  return $variables;
-}
-
-/**
  * Implements hook_variable_info().
  */
 function _google_tag_variable_info_general($options) {
-  // Gather data.
-  $args = array('@path' => 'https://tagmanager.google.com/');
-  $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', $args, $options);
 
-  // Build variables.
-  $variables['google_tag_container_id'] = array(
-    'type' => 'string',
-    'title' => t('Container ID', array(), $options),
-    'description' => $description,
-    'default' => '',
-    'validate callback' => '_google_tag_validate_container_id',
-    'element' => array(
-      '#attributes' => array('placeholder' => array('GTM-xxxxxx')),
-      '#size' => 12,
-      '#maxlength' => 15,
-      '#required' => TRUE,
-    ),
-  );
-
-  return $variables;
 }
 
 /**
  * Implements hook_variable_info().
  */
 function _google_tag_variable_info_path($options) {
-  // Gather data.
-  $args = array(
-    '%blog' => 'blog',
-    '%blog-wildcard' => 'blog/*',
-    '%front' => '<front>',
-  );
-  $list_description = t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args, $options);
 
-  // Build variables.
-  $variables['google_tag_path_toggle'] = array(
-    'type' => 'select',
-    'title' => t('Add snippet on specific paths', array(), $options),
-    'options' => array(
-      GOOGLE_TAG_EXCLUDE_LISTED => t('All paths except the listed paths', array(), $options),
-      GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed paths', array(), $options),
-    ),
-    'default' => GOOGLE_TAG_EXCLUDE_LISTED,
-  );
-
-  $variables['google_tag_path_list'] = array(
-    'type' => 'text',
-    'title' => t('Listed paths', array(), $options),
-    'description' => $list_description,
-    'default' => GOOGLE_TAG_PATHS,
-    'validate callback' => '_google_tag_validate_text',
-    'element' => array(
-      '#rows' => 10,
-    ),
-  );
-
-  return $variables;
 }
 
 /**
