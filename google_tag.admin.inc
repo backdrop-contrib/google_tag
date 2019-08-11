@@ -17,7 +17,11 @@
  */
 function google_tag_settings_form($form, &$form_state) {
   $config = config('google_tag.settings');
-//  module_load_include('inc', 'google_tag', 'includes/variable');
+
+  $form['intro'] = array(
+    '#type' => 'item',
+    '#description' => t('<a href="@path">Google Tag Manager</a> is a free service (registration required) to manage the insertion of tags for capturing website analytics.', $args = array('@path' => 'https://tagmanager.google.com/')),
+  );
 
   // Gather data.
   // @todo Set this on validation errors.
@@ -36,8 +40,7 @@ function google_tag_settings_form($form, &$form_state) {
   );
 
   // General tab
-  $args = array('@path' => 'https://tagmanager.google.com/');
-  $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', $args);
+  $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', array('@path' => 'https://tagmanager.google.com/'));
 
   $form['tabs']['general'] = array(
     '#type' => 'fieldset',
@@ -49,7 +52,7 @@ function google_tag_settings_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Container ID'),
     '#description' => $description,
-    '#validate callback' => '_google_tag_validate_container_id',
+    '#element_validate' => array('google_tag_validate_container_id'),
     '#attributes' => array('placeholder' => array('GTM-xxxxxx')),
     '#default_value' => $config->get('google_tag_container_id'),
     '#size' => 12,
@@ -57,14 +60,7 @@ function google_tag_settings_form($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  // Paths tab
-  $args = array(
-    '%blog' => 'blog',
-    '%blog-wildcard' => 'blog/*',
-    '%front' => '<front>',
-  );
-  $list_description = t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args);
-
+  // Path tab
   $form['tabs']['path'] = array(
     '#type' => 'fieldset',
     '#title' => t('Page paths'),
@@ -83,12 +79,177 @@ function google_tag_settings_form($form, &$form_state) {
   $form['tabs']['path']['google_tag_path_list'] = array(
     '#type' => 'textarea',
     '#title' => t('Listed paths'),
-    '#description' => $list_description,
+    '#description' => t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args = array('%blog' => 'blog', '%blog-wildcard' => 'blog/*', '%front' => '<front>')),
     '#default_value' => $config->get('google_tag_path_list'),
-    '#validate callback' => '_google_tag_validate_text',
+    '#element_validate' => array('google_tag_validate_text'),
     '#rows' => 10,
   );
 
+  // Role tab
+  $form['tabs']['role'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User roles'),
+  );
+
+  $form['tabs']['role']['google_tag_role_toggle'] = array(
+    '#type' => 'radios',
+    '#title' => t('Add snippet for specific roles'),
+    '#options' => array(
+      GOOGLE_TAG_EXCLUDE_LISTED => t('All roles except the selected roles'),
+      GOOGLE_TAG_INCLUDE_LISTED => t('Only the selected roles'),
+    ),
+    '#default_value' => $config->get('google_tag_role_toggle'),
+  );
+
+  $role_options = array_map('check_plain', user_roles());
+  $form['tabs']['role']['google_tag_role_list'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Selected roles'),
+    '#default_value' => $config->get('google_tag_role_list'),
+    '#options' => $role_options,
+  );
+
+  // Status tab
+  $form['tabs']['status'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Response statuses'),
+    '#description' => t('<p>On this tab, specify the page response status condition.</p>'),
+  );
+
+  // Build variables.
+  $form['tabs']['status']['google_tag_status_toggle'] = array(
+    '#type' => 'radios',
+    '#title' => t('Add snippet for specific statuses'),
+    '#options' => array(
+      GOOGLE_TAG_EXCLUDE_LISTED => t('All statuses except the listed statuses'),
+      GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed statuses'),
+    ),
+    '#default_value' => $config->get('google_tag_status_toggle'),
+  );
+
+  $form['tabs']['status']['google_tag_status_list'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Listed statuses'),
+    '#description' => t('Enter one response status per line. For more information, refer to the <a href="@path">list of HTTP status codes</a>.', array('@path' => 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes')),
+    '#default_value' => $config->get('google_tag_status_list'),
+    '#element_validate' => array('google_tag_validate_text'),
+    '#rows' => 5,
+  );
+
+  // Advanced tab
+  $form['tabs']['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+  );
+
+  // Build variables.
+  $form['tabs']['advanced']['google_tag_compact_snippet'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Compact the JavaScript snippet'),
+    '#description' => t('If checked, then the JavaScript snippet will be compacted to remove unnecessary whitespace. This is <strong>recommended on production sites</strong>. Leave unchecked to output a snippet that can be examined using a JavaScript debugger in the browser.'),
+    '#default_value' => $config->get('google_tag_compact_snippet'),
+  );
+
+  $form['tabs']['advanced']['google_tag_include_file'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Include the snippet as a file'),
+    '#description' => t('If checked, then each JavaScript snippet will be included as a file. This is <strong>recommended</strong>. Leave unchecked to inline each snippet into the page. This only applies to data layer and script snippets.'),
+    '#default_value' => $config->get('google_tag_include_file'),
+  );
+
+  $form['tabs']['advanced']['google_tag_debug_output'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show debug output'),
+    '#description' => t('If checked, then the result of each snippet insertion condition will be shown in the message area. Enable <strong>only for development</strong> purposes.'),
+    '#default_value' => $config->get('google_tag_debug_output'),
+  );
+
+  $disabled = !module_exists('datalayer');
+  $markup = t('If the default data layer name is used, then enable the <a href="@path">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args = array('@path' => 'https://www.drupal.org/project/datalayer'));
+
+  $form['tabs']['advanced']['google_tag_data_layer'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Data layer'),
+    '#description' => t('The name of the data layer. Default value is "dataLayer". In most cases, use the default.'),
+    '#default_value' => $config->get('google_tag_data_layer'),
+    '#element_validate' => array('google_tag_validate_data_layer'),
+    '#attributes' => array('placeholder' => array('dataLayer')),
+    '#required' => TRUE,
+    '#prefix' => $disabled ? '<span>' . $markup . '</span>' : '',
+  );
+
+  $form['tabs']['advanced']['google_tag_include_classes'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Add classes to the data layer'),
+    '#description' => t('If checked, then the listed classes will be added to the data layer.'),
+    '#default_value' => $config->get('google_tag_include_classes'),
+    '#element_validate' => array('google_tag_validate_listed_classes'),
+  );
+
+  $form['tabs']['advanced']['google_tag_whitelist_classes'] = array(
+    '#type' => 'textarea',
+    '#title' => t('White-listed classes'),
+    '#description' => t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="@path">developer documentation</a>.', $args = array('@path' => 'https://developers.google.com/tag-manager/devguide#security')),
+    '#default_value' => $config->get('google_tag_whitelist_classes'),
+    '#element_validate' => array('google_tag_validate_text'),
+    '#rows' => 5,
+    '#states' => _google_tag_variable_states('google_tag_include_classes'),
+  );
+
+  $form['tabs']['advanced']['google_tag_blacklist_classes'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Black-listed classes'),
+    '#description' => t('The types of tags, triggers, and variables <strong>forbidden</strong> on a page. Enter one class per line.'),
+    '#default_value' => $config->get('google_tag_blacklist_classes'),
+    '#element_validate' => array('google_tag_validate_text'),
+    '#rows' => 5,
+    '#states' => _google_tag_variable_states('google_tag_include_classes'),
+  );
+
+  $form['tabs']['advanced']['google_tag_include_environment'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Include an environment'),
+    '#description' => t('If checked, then the applicable snippets will include the environment items below. Enable <strong>only for development</strong> purposes.'),
+    '#default_value' => $config->get('google_tag_include_environment'),
+  );
+
+  $form['tabs']['advanced']['google_tag_environment_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Environment ID'),
+    '#description' => t('The environment ID to use with this website container. To get an environment ID, <a href="@path">select Environments</a>, create an environment, then click the "Get Snippet" action. The environment ID and token will be in the snippet.', $args = array('@path' => 'https://tagmanager.google.com/#/admin')),
+    '#default_value' => $config->get('google_tag_environment_id'),
+    '#element_validate' => array('google_tag_validate_environment_id'),
+    '#attributes' => array('placeholder' => array('env-x')),
+    '#size' => 10,
+    '#maxlength' => 7,
+    '#states' => _google_tag_variable_states('google_tag_include_environment'),
+  );
+
+  $form['tabs']['advanced']['google_tag_environment_token'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Environment token'),
+    '#description' => t('The authentication token for this environment.'),
+    '#default_value' => $config->get('google_tag_environment_token'),
+    '#attributes' => array('placeholder' => array('xxxxxxxxxxxxxxxxxxxxxx')),
+    '#size' => 20,
+    '#maxlength' => 25,
+    '#states' => _google_tag_variable_states('google_tag_include_environment'),
+  );
+
+  // dataLayer variables
+  $markup = t('<strong>NOTE</strong>: If using the dataLayer module to insert these values and variable realms are in effect, then <a href="@path">check this item to be realm-specific</a>.', $args = array('@path' => 'admin/config/system/variable/realm/language/configure'));
+  $visible = module_exists('datalayer') && module_exists('variable_realm');
+
+  $form['tabs']['advanced']['google_tag_data_layer_classes'] = array(
+    '#type' => 'properties',
+    '#title' => t('Data layer classes'),
+    '#description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>'),
+    '#default_value' => $config->get('google_tag_data_layer_classes'),
+//    '#prefix' => $visible ? '<span>' . $markup . '</span>' : '',
+    '#attributes' => array('class' => array('element-invisible')),
+  );
+
+  // Submit
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -97,162 +258,46 @@ function google_tag_settings_form($form, &$form_state) {
     '#value' => t('Save configuration'),
   );
 
-
-//  $groups = array(
-//    'general' => array('title' => t('General'), 'collapse' => FALSE),
-//    'path' => array('title' => t('Page paths'), 'description' => $description),
-//    'role' => array('title' => t('User roles'), 'description' => t('On this tab, specify the user role condition.')),
-//    'status' => array('title' => t('Response statuses'), 'description' => t('On this tab, specify the page response status condition.')),
-//    'advanced' => array('title' => t('Advanced')),
-//  );
-
-  // Build form elements.
-//  $form['tabs'] = array(
-//    '#type' => 'vertical_tabs',
-//    '#default_tab' => $default_tab ? $default_tab : 'edit-general',
-//    '#attributes' => array('class' => array('google-tag')),
-//    '#attached' => array(
-//      'css' => array(backdrop_get_path('module', 'google_tag') . '/css/google_tag.admin.css'),
-//      'js' => array(backdrop_get_path('module', 'google_tag') . '/js/google_tag.admin.js'),
-//    ),
-//  );
-//  foreach ($groups as $group => $items) {
-//    $form['tabs'][$group] = google_tag_fieldset($group, $items);
-//  }
-
-
-//  $form['#after_build'] = array('google_tag_settings_form_after_build');
-
   return $form;
-}
-
-/**
- * Fieldset builder for the module settings form.
- */
-function google_tag_fieldset($group, $items) {
-  // Gather data.
-//  $function = "_google_tag_variable_info_$group";
-//  $variables = $function(array());
-//  $items += array('description' => '', 'collapse' => TRUE);
-//
-//  // Build form elements.
-//  $fieldset = array(
-//    '#type' => 'fieldset',
-//    '#title' => $items['title'],
-//    '#description' => $items['description'],
-//    '#collapsible' => $items['collapse'],
-//    '#collapsed' => $items['collapse'],
-//    '#tree' => FALSE,
-//  );
-//  $fieldset += google_tag_form_elements($variables);
-//
-//  return $fieldset;
-}
-
-/**
- * Returns form elements from variable definitions.
- *
- * @param array $variables
- *   Associative array of variable definitions.
- *
- * @return array
- *   Associative array of form elements.
- */
-function google_tag_form_elements($variables) {
-//  static $keys = array(
-//    'type' => '#type',
-//    'title' => '#title',
-//    'description' => '#description',
-//    'options' => '#options',
-//// @todo is it safe to just kill this since we will read from confg?
-////    'default' => '#default_value',
-//  );
-//  $elements = array();
-//  foreach ($variables as $name => $variable) {
-//    $element = array();
-//    foreach ($keys as $key => $property) {
-//      if (isset($variable[$key])) {
-//        $element[$property] = $variable[$key];
-//      }
-//    }
-//    $element['#type'] = google_tag_form_element_type($element['#type']);
-////    @todo is it safe to just kill this since we will read from config?
-////    $element['#default_value'] = config_get('google_tag.settings',$name, $variable['default']);
-//    $element += isset($variable['element']) ? $variable['element'] : array();
-//    $elements[$name] = $element;
-//  }
-//
-//  return $elements;
-}
-
-/**
- * Converts variable type to form element type.
- *
- * @param string $type
- *   Variable type.
- *
- * @return string
- *   Form element type.
- */
-function google_tag_form_element_type($type) {
-//  static $keys = array(
-//    'string' => 'textfield',
-//    'select' => 'radios',
-//    'text' => 'textarea',
-//    'options' => 'checkboxes',
-//    'boolean' => 'checkbox',
-//  );
-//  return isset($keys[$type]) ? $keys[$type] : 'textfield';
-}
-
-/**
- * Element after build callback for google_tag_settings_form().
- */
-function google_tag_settings_form_after_build($element, &$form_state) {
-//  // This will follow:
-//  // variable_realm_variable_settings_form_submit
-//  // variable_settings_form_submit
-//  $element['#submit'][] = 'google_tag_settings_form_submit';
-//  return $element;
 }
 
 /**
  * Form validation handler for google_tag_settings_form().
  */
 function google_tag_settings_form_validate($form, &$form_state) {
-//  $values = &$form_state['values'];
-//
-//  // Trim the text values.
-//  $values['google_tag_container_id'] = trim($values['google_tag_container_id']);
-//  $values['google_tag_data_layer'] = trim($values['google_tag_data_layer']);
-//  google_tag_text_clean($values['google_tag_path_list']);
-//  google_tag_text_clean($values['google_tag_status_list']);
-//  google_tag_text_clean($values['google_tag_whitelist_classes']);
-//  google_tag_text_clean($values['google_tag_blacklist_classes']);
-//
-//  // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
-//  $values['google_tag_container_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_container_id']);
-//  $values['google_tag_environment_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_environment_id']);
-//
-//  if (!preg_match('/^GTM-\w{4,}$/', $values['google_tag_container_id'])) {
-//    // @todo Is there a more specific regular expression that applies?
-//    // @todo Is there a way to "test the connection" to determine a valid ID for
-//    // a container? It may be valid but not the correct one for the website.
-//    form_set_error('google_tag_container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
-//  }
-//  if ($values['google_tag_include_environment'] && !preg_match('/^env-\d{1,}$/', $values['google_tag_environment_id'])) {
-//    form_set_error('google_tag_environment_id', t('A valid environment ID is case sensitive and formatted like env-x.'));
-//  }
-//  if ($message = _google_tag_data_layer_verify($values['google_tag_data_layer'])) {
-//    form_set_error('google_tag_data_layer', $message);
-//  }
-//  if ($values['google_tag_include_classes']) {
-//    if (empty($values['google_tag_whitelist_classes']) && empty($values['google_tag_blacklist_classes'])) {
-//      form_set_error('google_tag_include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
-//      form_set_error('google_tag_whitelist_classes', '');
-//      form_set_error('google_tag_blacklist_classes', '');
-//    }
-//  }
+  $values = &$form_state['values'];
+
+  // Trim the text values.
+  $values['google_tag_container_id'] = trim($values['google_tag_container_id']);
+  $values['google_tag_data_layer'] = trim($values['google_tag_data_layer']);
+  google_tag_text_clean($values['google_tag_path_list']);
+  google_tag_text_clean($values['google_tag_status_list']);
+  google_tag_text_clean($values['google_tag_whitelist_classes']);
+  google_tag_text_clean($values['google_tag_blacklist_classes']);
+
+  // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
+  $values['google_tag_container_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_container_id']);
+  $values['google_tag_environment_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_environment_id']);
+
+  if (!preg_match('/^GTM-\w{4,}$/', $values['google_tag_container_id'])) {
+    // @todo Is there a more specific regular expression that applies?
+    // @todo Is there a way to "test the connection" to determine a valid ID for
+    // a container? It may be valid but not the correct one for the website.
+    form_set_error('google_tag_container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
+  }
+  if ($values['google_tag_include_environment'] && !preg_match('/^env-\d{1,}$/', $values['google_tag_environment_id'])) {
+    form_set_error('google_tag_environment_id', t('A valid environment ID is case sensitive and formatted like env-x.'));
+  }
+  if ($message = _google_tag_data_layer_verify($values['google_tag_data_layer'])) {
+    form_set_error('google_tag_data_layer', $message);
+  }
+  if ($values['google_tag_include_classes']) {
+    if (empty($values['google_tag_whitelist_classes']) && empty($values['google_tag_blacklist_classes'])) {
+      form_set_error('google_tag_include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
+      form_set_error('google_tag_whitelist_classes', '');
+      form_set_error('google_tag_blacklist_classes', '');
+    }
+  }
 }
 
 /**
@@ -263,39 +308,21 @@ function google_tag_settings_form_submit($form, &$form_state) {
   $config->set('google_tag_container_id', $form_state['values']['google_tag_container_id']);
   $config->set('google_tag_path_toggle', $form_state['values']['google_tag_path_toggle']);
   $config->set('google_tag_path_list', $form_state['values']['google_tag_path_list']);
-
-  //
-  //@todo all of the variables
-  // examples from googleanalytics
-
-  //  $config->set('account', $form_state['values']['googleanalytics_account']);
-  //  $config->set('domain_mode', (int) $form_state['values']['googleanalytics_domain_mode']);
-  //  $config->set('cross_domains', $form_state['values']['googleanalytics_cross_domains']);
-  //  $config->set('visibility_pages', (int) $form_state['values']['googleanalytics_visibility_pages']);
-  //  $config->set('pages', $form_state['values']['googleanalytics_pages']);
-  //  $config->set('visibility_roles', (int) $form_state['values']['googleanalytics_visibility_roles']);
-  //  $config->set('roles', array_keys(array_filter($form_state['values']['googleanalytics_roles'])));
-  //  $config->set('custom', $form_state['values']['googleanalytics_custom']);
-  //  $config->set('trackuserid', (bool) $form_state['values']['googleanalytics_trackuserid']);
-  //  $config->set('trackoutbound', (bool) $form_state['values']['googleanalytics_trackoutbound']);
-  //  $config->set('trackmailto', (bool) $form_state['values']['googleanalytics_trackmailto']);
-  //  $config->set('trackfiles', (bool) $form_state['values']['googleanalytics_trackfiles']);
-  //  $config->set('trackfiles_extensions', $form_state['values']['googleanalytics_trackfiles_extensions']);
-  //  $config->set('tracklinkid', (bool) $form_state['values']['googleanalytics_tracklinkid']);
-  //  $config->set('trackurlfragments', (bool) $form_state['values']['googleanalytics_trackurlfragments']);
-  //  $config->set('trackmessages', $form_state['values']['googleanalytics_trackmessages']);
-  //  $config->set('site_search', (bool) $form_state['values']['googleanalytics_site_search']);
-  //  $config->set('trackadsense', (bool) $form_state['values']['googleanalytics_trackadsense']);
-  //  $config->set('trackdoubleclick', (bool) $form_state['values']['googleanalytics_trackdoubleclick']);
-  //  $config->set('tracker_anonymizeip', (bool) $form_state['values']['googleanalytics_tracker_anonymizeip']);
-  //  $config->set('privacy_donottrack', (bool) $form_state['values']['googleanalytics_privacy_donottrack']);
-  //  $config->set('custom_dimension', $form_state['values']['googleanalytics_custom_dimension']);
-  //  $config->set('custom_metric', $form_state['values']['googleanalytics_custom_metric']);
-  //  $config->set('cache', (bool) $form_state['values']['googleanalytics_cache']);
-  //  $config->set('codesnippet_create', $form_state['values']['googleanalytics_codesnippet_create']);
-  //  $config->set('codesnippet_before', $form_state['values']['googleanalytics_codesnippet_before']);
-  //  $config->set('codesnippet_after', $form_state['values']['googleanalytics_codesnippet_after']);
-  //  $config->set('debug', (bool) $form_state['values']['googleanalytics_debug']);
+  $config->set('google_tag_role_toggle', $form_state['values']['google_tag_role_toggle']);
+  $config->set('google_tag_role_list', $form_state['values']['google_tag_role_list']);
+  $config->set('google_tag_status_toggle', $form_state['values']['google_tag_status_toggle']);
+  $config->set('google_tag_status_list', $form_state['values']['google_tag_status_list']);
+  $config->set('google_tag_compact_snippet', (bool) $form_state['values']['google_tag_compact_snippet']);
+  $config->set('google_tag_include_file', (bool) $form_state['values']['google_tag_include_file']);
+  $config->set('google_tag_debug_output', (bool) $form_state['values']['google_tag_debug_output']);
+  $config->set('google_tag_data_layer', $form_state['values']['google_tag_data_layer']);
+  $config->set('google_tag_include_classes', (bool) $form_state['values']['google_tag_include_classes']);
+  $config->set('google_tag_whitelist_classes', $form_state['values']['google_tag_whitelist_classes']);
+  $config->set('google_tag_blacklist_classes', $form_state['values']['google_tag_blacklist_classes']);
+  $config->set('google_tag_include_environment', $form_state['values']['google_tag_include_environment']);
+  $config->set('google_tag_environment_id', $form_state['values']['google_tag_environment_id']);
+  $config->set('google_tag_environment_token', $form_state['values']['google_tag_environment_token']);
+  $config->set('google_tag_data_layer_classes', $form_state['values']['google_tag_data_layer_classes']);
 
   $config->save();
 
@@ -596,4 +623,121 @@ function _google_tag_message_display($message, $args = array(), $type = 'status'
   if ($google_tag_display_message) {
     backdrop_set_message(t($message, $args), $type);
   }
+}
+
+/**
+ * Element validation handler for google_tag_container_id.
+ *
+ * @todo This may suffice for all the elements as only the container_id has an
+ *   error message. Error messages could be done for other elements by calling
+ *   form_set_error('element[name]', $message).
+ */
+function google_tag_validate_container_id($element, &$form_state) {
+//  // Use this routine as the variable realm form has nested values.
+//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+//  // Trim the text value.
+//  $value = trim($value);
+//  // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
+//  $value = str_replace(array('–', '—', '−'), '-', $value);
+//  // Replace the text value.
+//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+//
+//  if (!preg_match('/^GTM-\w{4,}$/', $value)) {
+//    // @todo Is there a more specific regular expression that applies?
+//    // @todo Is there a way to "test the connection" to determine a valid ID for
+//    // a container? It may be valid but not the correct one for the website.
+//    return t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.');
+//  }
+}
+
+/**
+ * Element validation handler for google_tag_environment_id.
+ */
+function google_tag_validate_environment_id($element, $form, &$form_state) {
+//  // @todo This will not prevent checking 'include_environment' on an individual
+//  // variable edit form and never setting the 'environment_id'.
+//  $parents = $element['#parents'];
+//  array_pop($parents);
+//  $parents[] = 'google_tag_include_environment';
+//  $include_environment = backdrop_array_get_nested_value($form_state['values'], $parents);
+//
+//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+//  $value = trim($value);
+//  $value = str_replace(array('–', '—', '−'), '-', $value);
+//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+//
+//  if ($include_environment && !preg_match('/^env-\d{1,}$/', $value)) {
+//    return t('A valid environment ID is case sensitive and formatted like env-x.');
+//  }
+}
+
+/**
+ * Element validation handler for google_tag_data_layer.
+ */
+function google_tag_validate_data_layer($element, $form, &$form_state) {
+//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+//  $value = trim($value);
+//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+//  return _google_tag_data_layer_verify($value);
+}
+
+/**
+ * Element validation handler for google_tag_listed_classes.
+ */
+function google_tag_validate_listed_classes($element, $form, &$form_state) {
+//  if (!backdrop_array_get_nested_value($form_state['values'], $element['#parents'])) {
+//    return;
+//  }
+//
+//  $keys = array('google_tag_whitelist_classes', 'google_tag_blacklist_classes');
+//  $variables = isset($form['#variable_edit_form']) ? $form['#variable_edit_form'] : array();
+//  $items = array_diff($keys, $variables);
+//  if (!empty($items)) {
+//    // Need both variables on form to validate.
+//    form_set_error('google_tag_include_classes', t('To validate listed classes, include the whitelist and blacklist variables in the realm variables.'));
+//    return;
+//  }
+//
+//  $empty = TRUE;
+//  foreach ($keys as $key) {
+//    array_pop($element['#parents']);
+//    $element['#parents'][] = $key;
+//    $classes = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+//    google_tag_text_clean($classes);
+//    $empty &= empty($classes);
+//  }
+//  if ($empty) {
+//    form_set_error('google_tag_include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
+//    form_set_error('google_tag_whitelist_classes', '');
+//    form_set_error('google_tag_blacklist_classes', '');
+//  }
+}
+
+/**
+ * Element validation handler for text values.
+ */
+function google_tag_validate_text($element, $form, &$form_state) {
+//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+//  google_tag_text_clean($value);
+//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+}
+
+/**
+ * Returns states array for a form element.
+ *
+ * @param string $variable
+ *   The name of the form element.
+ *
+ * @return array
+ *   The states array.
+ */
+function _google_tag_variable_states($variable) {
+  return array(
+    'required' => array(
+      ':input[name="' . $variable . '"]' => array('checked' => TRUE),
+    ),
+    'invisible' => array(
+      ':input[name="' . $variable . '"]' => array('checked' => FALSE),
+    ),
+  );
 }
