@@ -61,9 +61,14 @@ function google_tag_settings_form($form, &$form_state) {
   );
 
   // Path tab
+  $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
+  $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
+  $description .= t(' On this tab, specify the path condition.');
+
   $form['tabs']['path'] = array(
     '#type' => 'fieldset',
     '#title' => t('Page paths'),
+    '#description' => '<p>' . $description . '</p>',
   );
 
   $form['tabs']['path']['google_tag_path_toggle'] = array(
