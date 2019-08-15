@@ -3,8 +3,6 @@
 /**
  * @file
  * Provides install, update, and uninstall functions.
- *
- * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
 /**

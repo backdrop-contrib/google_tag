@@ -3,8 +3,6 @@
 /**
  * @file
  * Contains the administrative page and form callbacks.
- *
- * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
 /**

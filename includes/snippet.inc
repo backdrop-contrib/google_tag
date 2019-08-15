@@ -3,8 +3,6 @@
 /**
  * @file
  * Contains the JavaScript snippet insertion code.
- *
- * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
 /**

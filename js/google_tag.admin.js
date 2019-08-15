@@ -1,8 +1,6 @@
 /**
  * @file
  * Behaviors and utility functions for administrative pages.
- *
- * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
 (function ($) {

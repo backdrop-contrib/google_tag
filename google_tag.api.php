@@ -3,8 +3,6 @@
 /**
  * @file
  * Documents hooks provided by this module.
- *
- * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
 /**
