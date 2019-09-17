@@ -52,6 +52,7 @@ Current Maintainers
 
 - Jen Lampton (https://github.com/jenlampton).
 - Kevin Thull (https://github.com/kthull).
+- Seeking additional maintainers.
 
 Credits
 -------
