@@ -234,13 +234,16 @@ function google_tag_preprocess_page(&$variables) {
   $noscript = @file_get_contents($url);
 
   if ($noscript) {
-    // Note: for any theme that follows the pattern of core html.tpl.php in the
+    // Note: for any theme that follows the pattern of core page.tpl.php in the
     // system module (e.g. bootstrap theme), this does not place the snippet
     // immediately after the body tag but rather after the 'skip-link' div.
-    $variables['page_bottom']['google_tag'] = array(
+    $google_tag = array(
       '#markup' => $noscript,
       '#weight' => -10,
     );
+    // Since render arrays can't be passed to page.tpl.php (since it has no
+    // preprocess laer -- it's an anomoly) we pre-render here.
+    $variables['page_bottom'] .= backdrop_render($google_tag);
   }
 
 }
