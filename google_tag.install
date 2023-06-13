@@ -31,7 +31,7 @@ function google_tag_requirements($phase) {
   $t = get_t();
   $requirements = array();
   if ($phase == 'runtime') {
-    if (!preg_match('/^GTM-\w{4,}$/', config_get('google_tag.settings','google_tag_container_id'))) {
+    if (!preg_match('/^GTM-\w{4,}$/', config_get('google_tag.settings', 'google_tag_container_id'))) {
       // Google Tag Manager container ID has not been set.
       $args = array('@path' => '/admin/config/system/google_tag');
       $description = $t('Configure this integration module on its <a href="@path">settings page</a>.', $args);
@@ -48,14 +48,13 @@ function google_tag_requirements($phase) {
     $directory = 'public://google_tag';
     module_load_include('inc', 'google_tag', 'google_tag.admin');
     if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
-      __file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+      _file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
     $is_executable = _google_tag_is_executable($directory);
     $is_writable = _google_tag_is_writable($directory);
     $is_directory = is_dir($directory);
     if (!$is_executable || !$is_writable || !$is_directory) {
       // The snippet directory does not exist or is not writable or searchable.
-
       // If applicable, get the directory path of stream wrapper.
       $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
       if (method_exists($wrapper, 'getDirectoryPath') && ($path = $wrapper->getDirectoryPath())) {
@@ -84,7 +83,7 @@ function google_tag_requirements($phase) {
         $value = $t('Not searchable');
       }
       if ($phase == 'install') {
-        $description .= $t(' For more information, see INSTALL.txt or the <a href=":handbook_url">online handbook</a>.', array(':handbook_url' => 'https://www.drupal.org/server-permissions'));
+        $description .= ' ' . $t('For more information, see the <a href="!handbook_url">online handbook</a>.', array('!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership'));
         $value = '';
       }
       $requirements['google_tag_snippet_directory'] = array(
@@ -120,24 +119,24 @@ function _google_tag_snippet_directory_prepare() {
 function google_tag_update_1000() {
   // Migrate variables to config.
   $config = config('google_tag.settings');
-  $config->set('google_tag_container_id', update_variable_get('google_tag_container_id',''));
-  $config->set('google_tag_path_toggle', update_variable_get('google_tag_path_toggle',''));
-  $config->set('google_tag_path_list', update_variable_get('google_tag_path_list','admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*'));
-  $config->set('google_tag_role_toggle', update_variable_get('google_tag_role_toggle',''));
-  $config->set('google_tag_role_list', update_variable_get('google_tag_role_list',array()));
-  $config->set('google_tag_status_toggle', update_variable_get('google_tag_status_toggle',''));
-  $config->set('google_tag_status_list', update_variable_get('google_tag_status_list','403 Forbidden\n404 Not Found'));
-  $config->set('google_tag_compact_snippet', update_variable_get('google_tag_compact_snippet',0));
-  $config->set('google_tag_include_file', update_variable_get('google_tag_include_file',1));
-  $config->set('google_tag_debug_output', update_variable_get('google_tag_debug_output',0));
-  $config->set('google_tag_data_layer', update_variable_get('google_tag_data_layer','dataLayer'));
-  $config->set('google_tag_data_layer_classes', update_variable_get('google_tag_data_layer_classes',array()));
-  $config->set('google_tag_whitelist_classes', update_variable_get('google_tag_whitelist_classes','google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes'));
-  $config->set('google_tag_blacklist_classes', update_variable_get('google_tag_blacklist_classes','customScripts\ncustomPixels'));
-  $config->set('google_tag_include_environment', update_variable_get('google_tag_include_environment',0));
-  $config->set('google_tag_environment_id', update_variable_get('google_tag_environment_id',''));
-  $config->set('google_tag_environment_token', update_variable_get('google_tag_environment_token',''));
-  $config->set('google_tag_include_classes', update_variable_get('google_tag_include_classes',0));
+  $config->set('google_tag_container_id', update_variable_get('google_tag_container_id', ''));
+  $config->set('google_tag_path_toggle', update_variable_get('google_tag_path_toggle', ''));
+  $config->set('google_tag_path_list', update_variable_get('google_tag_path_list', 'admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*'));
+  $config->set('google_tag_role_toggle', update_variable_get('google_tag_role_toggle', ''));
+  $config->set('google_tag_role_list', update_variable_get('google_tag_role_list', array()));
+  $config->set('google_tag_status_toggle', update_variable_get('google_tag_status_toggle', ''));
+  $config->set('google_tag_status_list', update_variable_get('google_tag_status_list', '403 Forbidden\n404 Not Found'));
+  $config->set('google_tag_compact_snippet', update_variable_get('google_tag_compact_snippet', 0));
+  $config->set('google_tag_include_file', update_variable_get('google_tag_include_file', 1));
+  $config->set('google_tag_debug_output', update_variable_get('google_tag_debug_output', 0));
+  $config->set('google_tag_data_layer', update_variable_get('google_tag_data_layer', 'dataLayer'));
+  $config->set('google_tag_data_layer_classes', update_variable_get('google_tag_data_layer_classes', array()));
+  $config->set('google_tag_whitelist_classes', update_variable_get('google_tag_whitelist_classes', 'google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes'));
+  $config->set('google_tag_blacklist_classes', update_variable_get('google_tag_blacklist_classes', 'customScripts\ncustomPixels'));
+  $config->set('google_tag_include_environment', update_variable_get('google_tag_include_environment', 0));
+  $config->set('google_tag_environment_id', update_variable_get('google_tag_environment_id', ''));
+  $config->set('google_tag_environment_token', update_variable_get('google_tag_environment_token', ''));
+  $config->set('google_tag_include_classes', update_variable_get('google_tag_include_classes', 0));
   $config->save();
 
   // Delete variables.
