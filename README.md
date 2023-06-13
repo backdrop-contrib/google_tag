@@ -8,7 +8,7 @@ systems onto their page(s) via Google's Tag Manager (GTM) hosted application.
 Installation
 ------------
 
-- Install this module using the (official Backdrop CMS instructions)[https://backdropcms.org/guide/modules].
+- Install this module using the [official Backdrop CMS instructions](https://backdropcms.org/guide/modules).
 
 - Visit the configuration page under **Administration > Configuration > System >
   Google Tag Manager** (`admin/config/system/google_tag`) and enter the required
@@ -25,8 +25,7 @@ Sign up for GTM and obtain a 'container ID' for your website. Enter the
 Issues
 ------
 
-Bugs and Feature requests should be reported in the (Issue Queue)[https://github.com/backdrop-contrib/google_tag/issues].
-
+Bugs and Feature requests should be reported in the [Issue Queue](https://github.com/backdrop-contrib/google_tag/issues).
 
 Troubleshooting
 ---------------
