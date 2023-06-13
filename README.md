@@ -27,7 +27,6 @@ Issues
 
 Bugs and Feature requests should be reported in the [Issue Queue](https://github.com/backdrop-contrib/google_tag/issues).
 
-
 Troubleshooting
 ---------------
 
