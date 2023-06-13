@@ -79,12 +79,9 @@ function google_tag_permission() {
 }
 
 /**
- * Implements hook_cron().
- *
- * @todo Could instead implement hook_flush_caches() called from system_cron()
- *   and drupal_flush_all_caches().
+ * Implements hook_flush_caches().
  */
-function google_tag_cron() {
+function google_tag_flush_caches() {
   google_tag_assets_create();
 }
 
