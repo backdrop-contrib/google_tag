@@ -8,11 +8,11 @@ systems onto their page(s) via Google's Tag Manager (GTM) hosted application.
 Installation
 ------------
 
-- Install this module using the (official Backdrop CMS instructions)[https://backdropcms.org/guide/modules].
+- Install this module using the official Backdrop CMS instructions at
+  https://backdropcms.org/guide/modules.
 
-- Visit the configuration page under **Administration > Configuration > System >
-  Google Tag Manager** (`admin/config/system/google_tag`) and enter the required
-  information.
+- Visit the configuration page under Administration > Configuration > System >
+  Google Tag Manager (admin/config/system/google_tag) and enter the required information.
 
 Requirements
 -------------
@@ -25,7 +25,8 @@ Sign up for GTM and obtain a 'container ID' for your website. Enter the
 Issues
 ------
 
-Bugs and Feature requests should be reported in the (Issue Queue)[https://github.com/backdrop-contrib/google_tag/issues].
+Bugs and Feature requests should be reported in the Issue Queue:
+https://github.com/backdrop-contrib/google_tag/issues.
 
 
 Troubleshooting
@@ -34,8 +35,8 @@ Troubleshooting
 If the JavaScript snippets are not present in the HTML output, try the following
 steps to debug the situation:
 
- * Confirm the snippet files exist at `public://google_tag/` (on most sites this
-   equates to `files/google_tag/`).
+ * Confirm the snippet files exist at public://google_tag/ (on most sites this
+   equates to sites/default/files/google_tag/).
 
    If missing, then visit the module settings page and submit the form to
    recreate the snippet files. The need to do this may arise if the project is
