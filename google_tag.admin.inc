@@ -635,94 +635,94 @@ function _google_tag_message_display($message, $args = array(), $type = 'status'
  *   error message. Error messages could be done for other elements by calling
  *   form_set_error('element[name]', $message).
  */
-function google_tag_validate_container_id($element, &$form_state) {
-//  // Use this routine as the variable realm form has nested values.
-//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
-//  // Trim the text value.
-//  $value = trim($value);
-//  // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
-//  $value = str_replace(array('–', '—', '−'), '-', $value);
-//  // Replace the text value.
-//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
-//
-//  if (!preg_match('/^GTM-\w{4,}$/', $value)) {
-//    // @todo Is there a more specific regular expression that applies?
-//    // @todo Is there a way to "test the connection" to determine a valid ID for
-//    // a container? It may be valid but not the correct one for the website.
-//    return t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.');
-//  }
+function google_tag_validate_container_id(&$element, &$form_state) {
+  // // Use this routine as the variable realm form has nested values.
+  //  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+  //  // Trim the text value.
+  //  $value = trim($value);
+  //  // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
+  //  $value = str_replace(array('–', '—', '−'), '-', $value);
+  //  // Replace the text value.
+  //  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  //
+  //  if (!preg_match('/^GTM-\w{4,}$/', $value)) {
+  //    // @todo Is there a more specific regular expression that applies?
+  //    // @todo Is there a way to "test the connection" to determine a valid ID for
+  //    // a container? It may be valid but not the correct one for the website.
+  //    return t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.');
+  //  }
 }
 
 /**
  * Element validation handler for google_tag_environment_id.
  */
-function google_tag_validate_environment_id($element, $form, &$form_state) {
-//  // @todo This will not prevent checking 'include_environment' on an individual
-//  // variable edit form and never setting the 'environment_id'.
-//  $parents = $element['#parents'];
-//  array_pop($parents);
-//  $parents[] = 'google_tag_include_environment';
-//  $include_environment = backdrop_array_get_nested_value($form_state['values'], $parents);
-//
-//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
-//  $value = trim($value);
-//  $value = str_replace(array('–', '—', '−'), '-', $value);
-//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
-//
-//  if ($include_environment && !preg_match('/^env-\d{1,}$/', $value)) {
-//    return t('A valid environment ID is case sensitive and formatted like env-x.');
-//  }
+function google_tag_validate_environment_id(&$element, &$form_state) {
+  // // @todo This will not prevent checking 'include_environment' on an individual
+  //  // variable edit form and never setting the 'environment_id'.
+  //  $parents = $element['#parents'];
+  //  array_pop($parents);
+  //  $parents[] = 'google_tag_include_environment';
+  //  $include_environment = backdrop_array_get_nested_value($form_state['values'], $parents);
+  //
+  //  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+  //  $value = trim($value);
+  //  $value = str_replace(array('–', '—', '−'), '-', $value);
+  //  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  //
+  //  if ($include_environment && !preg_match('/^env-\d{1,}$/', $value)) {
+  //    return t('A valid environment ID is case sensitive and formatted like env-x.');
+  //  }
 }
 
 /**
  * Element validation handler for google_tag_data_layer.
  */
-function google_tag_validate_data_layer($element, $form, &$form_state) {
-//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
-//  $value = trim($value);
-//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
-//  return _google_tag_data_layer_verify($value);
+function google_tag_validate_data_layer(&$element, &$form_state) {
+  // $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+  //  $value = trim($value);
+  //  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  //  return _google_tag_data_layer_verify($value);
 }
 
 /**
  * Element validation handler for google_tag_listed_classes.
  */
-function google_tag_validate_listed_classes($element, $form, &$form_state) {
-//  if (!backdrop_array_get_nested_value($form_state['values'], $element['#parents'])) {
-//    return;
-//  }
-//
-//  $keys = array('google_tag_whitelist_classes', 'google_tag_blacklist_classes');
-//  $variables = isset($form['#variable_edit_form']) ? $form['#variable_edit_form'] : array();
-//  $items = array_diff($keys, $variables);
-//  if (!empty($items)) {
-//    // Need both variables on form to validate.
-//    form_set_error('google_tag_include_classes', t('To validate listed classes, include the whitelist and blacklist variables in the realm variables.'));
-//    return;
-//  }
-//
-//  $empty = TRUE;
-//  foreach ($keys as $key) {
-//    array_pop($element['#parents']);
-//    $element['#parents'][] = $key;
-//    $classes = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
-//    google_tag_text_clean($classes);
-//    $empty &= empty($classes);
-//  }
-//  if ($empty) {
-//    form_set_error('google_tag_include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
-//    form_set_error('google_tag_whitelist_classes', '');
-//    form_set_error('google_tag_blacklist_classes', '');
-//  }
+function google_tag_validate_listed_classes(&$element, &$form_state) {
+  // If (!backdrop_array_get_nested_value($form_state['values'], $element['#parents'])) {
+  //    return;
+  //  }
+  //
+  //  $keys = array('google_tag_whitelist_classes', 'google_tag_blacklist_classes');
+  //  $variables = isset($form['#variable_edit_form']) ? $form['#variable_edit_form'] : array();
+  //  $items = array_diff($keys, $variables);
+  //  if (!empty($items)) {
+  //    // Need both variables on form to validate.
+  //    form_set_error('google_tag_include_classes', t('To validate listed classes, include the whitelist and blacklist variables in the realm variables.'));
+  //    return;
+  //  }
+  //
+  //  $empty = TRUE;
+  //  foreach ($keys as $key) {
+  //    array_pop($element['#parents']);
+  //    $element['#parents'][] = $key;
+  //    $classes = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+  //    google_tag_text_clean($classes);
+  //    $empty &= empty($classes);
+  //  }
+  //  if ($empty) {
+  //    form_set_error('google_tag_include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
+  //    form_set_error('google_tag_whitelist_classes', '');
+  //    form_set_error('google_tag_blacklist_classes', '');
+  //  }.
 }
 
 /**
  * Element validation handler for text values.
  */
-function google_tag_validate_text($element, $form, &$form_state) {
-//  $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
-//  google_tag_text_clean($value);
-//  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+function google_tag_validate_text(&$element, &$form_state) {
+  // $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+  //  google_tag_text_clean($value);
+  //  backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $value);
 }
 
 /**
