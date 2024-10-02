@@ -38,7 +38,7 @@ Backdrop.behaviors.gtmInsertionSettings = {
     $('fieldset#edit-role', context).backdropSetSummary(function (context) {
       var vals = [];
       $('input[type="checkbox"]:checked', context).each(function () {
-        vals.push($.trim($(this).next('label').text()));
+        vals.push($(this).next('label').text().trim());
       });
       var $radio = $('input[name="google_tag_role_toggle"]:checked', context);
       if ($radio.val() == 'exclude listed') {
