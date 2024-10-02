@@ -324,7 +324,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
   $config->set('google_tag_include_environment', $form_state['values']['google_tag_include_environment']);
   $config->set('google_tag_environment_id', $form_state['values']['google_tag_environment_id']);
   $config->set('google_tag_environment_token', $form_state['values']['google_tag_environment_token']);
-  $config->set('google_tag_data_layer_classes', (!empty($form_state['values']['google_tag_data_layer_classes'])) ? $form_state['values']['google_tag_data_layer_classes']) : array();
+  $config->set('google_tag_data_layer_classes', (!empty($form_state['values']['google_tag_data_layer_classes'])) ? $form_state['values']['google_tag_data_layer_classes'] : array());
 
   $config->save();
 
