@@ -37,7 +37,7 @@ function google_tag_settings_form($form, &$form_state) {
     ),
   );
 
-  // General tab
+  // General tab.
   $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', array('@path' => 'https://tagmanager.google.com/'));
 
   $form['tabs']['general'] = array(
@@ -58,7 +58,7 @@ function google_tag_settings_form($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  // Path tab
+  // Path tab.
   $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
   $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
   $description .= t(' On this tab, specify the path condition.');
@@ -88,7 +88,7 @@ function google_tag_settings_form($form, &$form_state) {
     '#rows' => 10,
   );
 
-  // Role tab
+  // Role tab.
   $form['tabs']['role'] = array(
     '#type' => 'fieldset',
     '#title' => t('User roles'),
@@ -112,7 +112,7 @@ function google_tag_settings_form($form, &$form_state) {
     '#options' => $role_options,
   );
 
-  // Status tab
+  // Status tab.
   $form['tabs']['status'] = array(
     '#type' => 'fieldset',
     '#title' => t('Response statuses'),
@@ -139,7 +139,7 @@ function google_tag_settings_form($form, &$form_state) {
     '#rows' => 5,
   );
 
-  // Advanced tab
+  // Advanced tab.
   $form['tabs']['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced'),
@@ -239,20 +239,19 @@ function google_tag_settings_form($form, &$form_state) {
     '#states' => _google_tag_variable_states('google_tag_include_environment'),
   );
 
-  // dataLayer variables
-  $markup = t('<strong>NOTE</strong>: If using the dataLayer module to insert these values and variable realms are in effect, then <a href="@path">check this item to be realm-specific</a>.', $args = array('@path' => 'admin/config/system/variable/realm/language/configure'));
-  $visible = module_exists('datalayer') && module_exists('variable_realm');
+  // dataLayer variables.
+  if (module_exists('datalayer') && module_exists('variable_realm')) {
+    $form['tabs']['advanced']['google_tag_data_layer_classes'] = array(
+      '#type' => 'properties',
+      '#title' => t('Data layer classes'),
+      '#description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>'),
+      '#default_value' => $config->get('google_tag_data_layer_classes'),
+      '#prefix' => '<span>' . t('<strong>NOTE</strong>: If using the dataLayer module to insert these values and variable realms are in effect, then <a href="@path">check this item to be realm-specific</a>.', $args = array('@path' => 'admin/config/system/variable/realm/language/configure')) . '</span>',
+      '#attributes' => array('class' => array('element-invisible')),
+    );
+  }
 
-  $form['tabs']['advanced']['google_tag_data_layer_classes'] = array(
-    '#type' => 'properties',
-    '#title' => t('Data layer classes'),
-    '#description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>'),
-    '#default_value' => $config->get('google_tag_data_layer_classes'),
-//    '#prefix' => $visible ? '<span>' . $markup . '</span>' : '',
-    '#attributes' => array('class' => array('element-invisible')),
-  );
-
-  // Submit
+  // Submit.
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -325,7 +324,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
   $config->set('google_tag_include_environment', $form_state['values']['google_tag_include_environment']);
   $config->set('google_tag_environment_id', $form_state['values']['google_tag_environment_id']);
   $config->set('google_tag_environment_token', $form_state['values']['google_tag_environment_token']);
-  $config->set('google_tag_data_layer_classes', $form_state['values']['google_tag_data_layer_classes']);
+  $config->set('google_tag_data_layer_classes', (!empty($form_state['values']['google_tag_data_layer_classes'])) ? $form_state['values']['google_tag_data_layer_classes']) : array();
 
   $config->save();
 
@@ -347,7 +346,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
  */
 function _google_tag_assets_create() {
   if (module_exists('variable_realm') && module_exists('variable_store')) {
-    // i18n_variable module depends on variable_realm, variable_store
+    // i18n_variable module depends on variable_realm, variable_store.
     $realms = variable_realm_list();
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
@@ -390,7 +389,6 @@ function _google_tag_directory_prepare($realm_name = '') {
   }
 
   // The snippet directory does not exist or is not writable or searchable.
-
   // If applicable, get the directory path of stream wrapper.
   $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
   if (method_exists($wrapper, 'getDirectoryPath') && ($path = $wrapper->getDirectoryPath())) {
@@ -432,14 +430,10 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
   $args = array('@count' => count($snippets));
   if ($realm_name) {
     $args += array('@realm' => $realm_string);
-    $message = $result
-      ? 'Created @count snippet files for @realm realm based on configuration.'
-      : 'An error occurred saving @count snippet files for @realm realm. Contact the site administrator if this persists.';
+    $message = $result ? 'Created @count snippet files for @realm realm based on configuration.' : 'An error occurred saving @count snippet files for @realm realm. Contact the site administrator if this persists.';
   }
   else {
-    $message = $result
-      ? 'Created @count snippet files based on configuration.'
-      : 'An error occurred saving @count snippet files. Contact the site administrator if this persists.';
+    $message = $result ? 'Created @count snippet files based on configuration.' : 'An error occurred saving @count snippet files. Contact the site administrator if this persists.';
   }
   _google_tag_message_display($message, $args, $result ? 'status' : 'error');
   if (!$result) {
@@ -451,7 +445,7 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
  * Stores data layer classes based on current settings.
  */
 function _google_tag_classes_save($realm_name = '', $realm_key = '') {
-  $data_layer = config_get('google_tag.settings','google_tag_data_layer');
+  $data_layer = config_get('google_tag.settings', 'google_tag_data_layer');
   if (module_exists('datalayer') && $data_layer == 'dataLayer') {
     // Save classes for data layer.
     // @todo How to or can we set the name of the data layer?
@@ -462,7 +456,7 @@ function _google_tag_classes_save($realm_name = '', $realm_key = '') {
       variable_realm_set($realm_name, $realm_key, 'google_tag_data_layer_classes', $classes);
     }
     else {
-      config_set('google_tag.settings','google_tag_data_layer_classes', $classes);
+      config_set('google_tag.settings', 'google_tag_data_layer_classes', $classes);
     }
   }
 }
