@@ -74,6 +74,8 @@ function google_tag_permission() {
     'administer google tag manager' => array(
       'title' => t('Administer Google Tag Manager'),
       'description' => t('Configure the website integration with Google Tag Manager.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows people to inject arbitrary JavaScript into the page using Google Tag Manager.'),
     ),
   );
 }
