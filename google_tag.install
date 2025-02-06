@@ -43,7 +43,7 @@ function google_tag_requirements($phase) {
       );
     }
   }
-  if ($phase == 'runtime' || $phase == 'update' || $phase == 'install') {
+  if ($phase == 'runtime' || $phase == 'install') {
     // Adapted from system_requirements().
     $directory = 'public://google_tag';
     module_load_include('inc', 'google_tag', 'google_tag.admin');
