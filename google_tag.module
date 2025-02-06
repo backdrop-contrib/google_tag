@@ -88,81 +88,6 @@ function google_tag_flush_caches() {
 }
 
 /**
- * Implements hook_variable_group_info().
- */
-function google_tag_variable_group_info() {
-  module_load_include('inc', 'google_tag', 'includes/variable');
-  return _google_tag_variable_group_info();
-}
-
-/**
- * Implements hook_variable_info().
- */
-function google_tag_variable_info($options) {
-  module_load_include('inc', 'google_tag', 'includes/variable');
-  return _google_tag_variable_info($options);
-}
-
-/**
- * Implements hook_form_FORM_ID_alter() for variable_edit_form().
- *
- * This applies to:
- * - individual variables with a path like:
- * admin/config/system/variable/edit/google_tag_role_toggle
- *
- * - all variables by group with a path like:
- * admin/config/system/variable/group/google_tag
- *
- * - all variables by module with a path like:
- * admin/config/system/variable/module/google_tag
- *
- * on the latter two forms:
- * - comment says 'These are global default variables.'
- * - regardless the highlighted value in realm switcher
- * - realm name:key = global:default
- * - $form[#variable_options][realm]->realm and key
- *
- * all of these forms have
- * - element parents are none
- * - $form[#variable_edit_form] contains list of variables on the form
- * - with first form need to check the variable being in this module
- *
- * on all pages:
- * - variable_realm_key_[realm] may be a query argument in the url
- */
-function google_tag_form_variable_edit_form_alter(&$form, &$form_state, $form_id) {
-  // Also include these on group and module pages for element validation.
-  form_load_include($form_state, 'inc', 'google_tag', 'google_tag.admin');
-  form_load_include($form_state, 'inc', 'google_tag', 'includes/variable');
-  if (strpos($_GET['q'], 'admin/config/system/variable/edit/') === 0) {
-    if (strpos($form['#variable_edit_form'][0], 'google_tag_') === 0) {
-      $form['#submit'][] = 'google_tag_settings_form_submit';
-    }
-  }
-}
-
-/**
- * Implements hook_form_FORM_ID_alter() for variable_realm_edit_variables_form().
- *
- * This applies to:
- * - selected variables by realm with a path like:
- * admin/config/system/variable/realm/language/edit
- * - $form[#variable_options][realm]->realm and key
- * - $form_state[build_info][args] = [ [0] => realm_name, [1] => realm_key ]
- * - element parents are [variables][google_tag]
- * - and tree is true on variables key
- * - $form[#variable_edit_form] contains list of variables on the form
- * - which includes variables from other modules
- */
-function google_tag_form_variable_realm_edit_variables_form_alter(&$form, &$form_state, $form_id) {
-  // @todo Why does variable_realm not set this item on this particular form?
-  $form['#realm_keys'][$form['#variable_options']['realm']->realm] = $form['#variable_options']['realm']->key;
-  $form['#submit'][] = 'google_tag_settings_form_submit';
-  form_load_include($form_state, 'inc', 'google_tag', 'google_tag.admin');
-  form_load_include($form_state, 'inc', 'google_tag', 'includes/variable');
-}
-
-/**
  * Implements hook_preprocess_page().
  *
  * Adds the snippet to the page array if the insertion conditions are met.
@@ -245,46 +170,6 @@ function google_tag_preprocess_page(&$variables) {
     $variables['page_bottom'] .= backdrop_render($google_tag);
   }
 
-}
-
-/**
- * Returns applicable realm name and key for the request.
- *
- * @return array
- *   The realm name and key.
- */
-function google_tag_realm_values() {
-  $realm_name = $realm_key = '';
-
-  if (module_exists('variable_realm') && module_exists('variable_store')) {
-    // If realms exist, then the non-realm snippet files will not be loaded.
-    // These are in the 'google_tag' directory beneath the site files directory.
-    // If variable_realm module is later removed, then visit the module settings
-    // page and update the settings.
-    $realms = variable_realm_current();
-    // Remove the global realm as this is always active.
-    unset($realms['global']);
-    if (empty($realms)) {
-      $realm_name = 'global';
-      $realm_key = 'default';
-    }
-    else {
-      // The variable_realm module allows multiple realms to be 'active' on a
-      // page request which leaves us in the dark as to which one to use.
-      // The realms are weighted; use first one after 'global:default'.
-      $realm_name = key($realms);
-      $realm_key = variable_realm_status($realm_name);
-    }
-    // Allow other modules to alter the realm name and key.
-    $realm_values = array('name' => $realm_name, 'key' => $realm_key);
-    backdrop_alter('google_tag_realm', $realm_values);
-    $realm_name = $realm_values['name'];
-    $realm_key = $realm_values['key'];
-
-    $debug = config_get('google_tag.settings','google_tag_debug_output');
-    $debug ? backdrop_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $realm_key))) : '';
-  }
-  return array($realm_name, $realm_key);
 }
 
 /**
