@@ -239,18 +239,6 @@ function google_tag_settings_form($form, &$form_state) {
     '#states' => _google_tag_variable_states('google_tag_include_environment'),
   );
 
-  // dataLayer variables.
-  if (module_exists('datalayer') && module_exists('variable_realm')) {
-    $form['tabs']['advanced']['google_tag_data_layer_classes'] = array(
-      '#type' => 'properties',
-      '#title' => t('Data layer classes'),
-      '#description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>'),
-      '#default_value' => $config->get('google_tag_data_layer_classes'),
-      '#prefix' => '<span>' . t('<strong>NOTE</strong>: If using the dataLayer module to insert these values and variable realms are in effect, then <a href="@path">check this item to be realm-specific</a>.', $args = array('@path' => 'admin/config/system/variable/realm/language/configure')) . '</span>',
-      '#attributes' => array('class' => array('element-invisible')),
-    );
-  }
-
   // Submit.
   $form['actions'] = array(
     '#type' => 'actions',
@@ -333,54 +321,27 @@ function google_tag_settings_form_submit($form, &$form_state) {
 
 /**
  * Saves snippet files and data layer classes based on current settings.
- *
- * Use case: variable_realm is not enabled
  * - one set of snippet files stored in public://google_tag
  *
- * Use case: variable_realm is enabled
- * - multiple sets of snippet files stored in public://google_tag/{realm}
- * - sub case: no google_tag variables are realm-specific
- *   update all snippet files based on global default variables
- * - sub case: some google_tag variables are realm-specific
- *   update all snippet files based on global and realm-specific variables
  */
 function _google_tag_assets_create() {
-  if (module_exists('variable_realm') && module_exists('variable_store')) {
-    // i18n_variable module depends on variable_realm, variable_store.
-    $realms = variable_realm_list();
-    foreach ($realms as $realm_name => $realm_title) {
-      $keys = variable_realm_keys($realm_name);
-      foreach ($keys as $key_name => $key_title) {
-        backdrop_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
-        variable_realm_switch($realm_name, $key_name);
-        if (_google_tag_directory_prepare($realm_name)) {
-          _google_tag_snippets_save($realm_name, $key_name);
-          _google_tag_classes_save($realm_name, $key_name);
-        }
-      }
-    }
+  if (_google_tag_directory_prepare()) {
+    _google_tag_snippets_save();
+    _google_tag_classes_save();
   }
-  else {
-    if (_google_tag_directory_prepare()) {
-      _google_tag_snippets_save();
-      _google_tag_classes_save();
-    }
-  }
-
   _backdrop_flush_css_js();
   backdrop_clear_js_cache();
 }
 
 /**
- * Prepares directory for base or realm specific snippet files.
+ * Prepares directory for base snippet files.
  *
  * @return bool
  *   Whether the directory was prepared.
  */
-function _google_tag_directory_prepare($realm_name = '') {
+function _google_tag_directory_prepare() {
   // From google_tag_requirements(); this should be a helper function (in core).
   $directory = 'public://google_tag';
-  $directory .= $realm_name ? "/$realm_name" : '';
   if (is_dir($directory) && _google_tag_is_writable($directory) && _google_tag_is_executable($directory)) {
     return TRUE;
   }
@@ -414,27 +375,18 @@ function _google_tag_directory_prepare($realm_name = '') {
  * @return bool
  *   Whether the files were saved.
  */
-function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
-  $realm_string = $realm_name ? "$realm_name:$realm_key" : 'default';
-  $realm_name .= $realm_name ? '/' : '';
-  $realm_key .= $realm_key ? '.' : '';
+function _google_tag_snippets_save() {
   // Save the altered snippets after hook_google_tag_snippets_alter().
   module_load_include('inc', 'google_tag', 'includes/snippet');
   $result = TRUE;
   $snippets = google_tag_snippets();
   foreach ($snippets as $type => $snippet) {
-    $path = file_unmanaged_save_data($snippet, "public://google_tag/{$realm_name}google_tag.$realm_key$type.js", FILE_EXISTS_REPLACE);
+    $path = file_unmanaged_save_data($snippet, "public://google_tag/google_tag.$type.js", FILE_EXISTS_REPLACE);
     $result = !$path ? FALSE : $result;
   }
 
   $args = array('@count' => count($snippets));
-  if ($realm_name) {
-    $args += array('@realm' => $realm_string);
-    $message = $result ? 'Created @count snippet files for @realm realm based on configuration.' : 'An error occurred saving @count snippet files for @realm realm. Contact the site administrator if this persists.';
-  }
-  else {
-    $message = $result ? 'Created @count snippet files based on configuration.' : 'An error occurred saving @count snippet files. Contact the site administrator if this persists.';
-  }
+  $message = $result ? 'Created @count snippet files based on configuration.' : 'An error occurred saving @count snippet files. Contact the site administrator if this persists.';
   _google_tag_message_display($message, $args, $result ? 'status' : 'error');
   if (!$result) {
     watchdog('google_tag', $message, $args, WATCHDOG_ERROR);
@@ -444,7 +396,7 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
 /**
  * Stores data layer classes based on current settings.
  */
-function _google_tag_classes_save($realm_name = '', $realm_key = '') {
+function _google_tag_classes_save() {
   $data_layer = config_get('google_tag.settings', 'google_tag_data_layer');
   if (module_exists('datalayer') && $data_layer == 'dataLayer') {
     // Save classes for data layer.
@@ -452,12 +404,7 @@ function _google_tag_classes_save($realm_name = '', $realm_key = '') {
     // This is an open issue on datalayer project; after it is implemented in
     // datalayer then remove second condition on if block.
     _google_tag_data_layer_snippet($classes);
-    if ($realm_name) {
-      variable_realm_set($realm_name, $realm_key, 'google_tag_data_layer_classes', $classes);
-    }
-    else {
-      config_set('google_tag.settings', 'google_tag_data_layer_classes', $classes);
-    }
+    config_set('google_tag.settings', 'google_tag_data_layer_classes', $classes);
   }
 }
 
