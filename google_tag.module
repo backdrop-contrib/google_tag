@@ -112,9 +112,6 @@ function google_tag_preprocess_page(&$variables) {
   $base_path = 'public:/';
   $include_classes = config_get('google_tag.settings','google_tag_include_classes');
 
-  list($realm_name, $realm_key) = google_tag_realm_values();
-  $realm_name .= $realm_name ? '/' : '';
-  $realm_key .= $realm_key ? '.' : '';
   $types = $include_classes ? array('data_layer', 'script') : array('script');
 
   $data_layer = config_get('google_tag.settings','google_tag_data_layer');
@@ -134,14 +131,14 @@ function google_tag_preprocess_page(&$variables) {
       // A stream wrapper may be passed as $data to backdrop_add_js($data) because
       // backdrop_get_js() calls file_create_url($data). The latter will work with
       // whichever class implements the stream, e.g. local, S3, or App Engine.
-      $path = "$base_path/google_tag/{$realm_name}google_tag.$realm_key$type.js";
+      $path = "$base_path/google_tag/google_tag.$type.js";
       // @todo Will it matter if file is empty?
       backdrop_add_js($path, array('group' => JS_LIBRARY * 2, 'requires_jquery' => FALSE, 'defer' => 'true'));
     }
   }
   else {
     foreach ($types as $type) {
-      $url = "$base_path/google_tag/{$realm_name}google_tag.$realm_key$type.js";
+      $url = "$base_path/google_tag/google_tag.$type.js";
       $contents = @file_get_contents($url);
       // @see backdrop_get_js()
       // For inline JavaScript to validate as XHTML, all JavaScript containing
@@ -154,7 +151,7 @@ function google_tag_preprocess_page(&$variables) {
 
   // Add noscript snippet to page_top region.
   $type = 'noscript';
-  $url = "$base_path/google_tag/{$realm_name}google_tag.$realm_key$type.js";
+  $url = "$base_path/google_tag/google_tag.$type.js";
   $noscript = @file_get_contents($url);
 
   if ($noscript) {
